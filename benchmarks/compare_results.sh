@@ -22,8 +22,9 @@
 #
 # Verdicts: IDENTICAL (same rows, same order), SAME (same rows; order differs
 # only among rows with equal sort keys), TIES (same count and same sort keys, but
-# a different row was chosen among rows that tie at a LIMIT/OFFSET boundary),
-# DIFFERENT (anything else - must be explained).
+# a different row was chosen among rows that tie at a LIMIT/OFFSET boundary; only
+# for a query that has LIMIT or OFFSET), DIFFERENT (anything else - must be
+# explained).
 set -euo pipefail
 
 BEFORE="${1:?before_db required}"
@@ -117,7 +118,9 @@ for f in $(ls "$TMP/orig"/*.sql | sort -V); do
     fi
     if [[ "$n1" == "$n2" && "$o1" == "$o2" ]]; then v=IDENTICAL
     elif [[ "$n1" == "$n2" && "$s1" == "$s2" && "$k1" == "$k2" ]]; then v=SAME
-    elif [[ "$n1" == "$n2" && "$k1" != "-" && "$k1" == "$k2" ]]; then v=TIES
+    # without a LIMIT or OFFSET no tie can be cut, so other rows under the same
+    # sort keys are a different result, not a tie
+    elif [[ "$n1" == "$n2" && "$k1" != "-" && "$k1" == "$k2" ]] && grep -qiw -E 'limit|offset' "$f"; then v=TIES
     else v=DIFFERENT; fi
     type=READ
   fi
