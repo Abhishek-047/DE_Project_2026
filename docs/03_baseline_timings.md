@@ -2,7 +2,7 @@
 
 **Team T0015 (Bluetrace), Section E**
 
-All 30 queries from `queries/workload_30.sql` were run, unchanged, against the Phase 2 schema with no tuning indexes. Every number below comes from the raw plan files in [`benchmarks/results/baseline/`](../benchmarks/results/baseline/) (`R01.txt` ... `W05.txt`, three runs each) and from [`summary.csv`](../benchmarks/results/baseline/summary.csv).
+All 30 queries from `queries/workload_30.sql` were run, unchanged, against the Phase 2 schema with no tuning indexes. Every number below comes from the raw plan files in [`benchmarks/results/baseline/`](../benchmarks/results/baseline/) (`R01.txt` ... `W05.txt`, three runs each) and from [`summary.csv`](../benchmarks/results/baseline/summary.csv). [`benchmarks/check_reports.py`](../benchmarks/check_reports.py) recomputes each of them from those files.
 
 ## 1. How we measured
 

@@ -63,6 +63,8 @@ psql -d practo_base -c "ALTER DATABASE practo_base SET timezone TO 'Asia/Kolkata
 psql -d practo -v ON_ERROR_STOP=1 -f sql/05_indexes.sql      # Phase 4: indexes and summary tables
 ./benchmarks/run_benchmark.sh practo optimized 5 sql/06_optimized_queries.sql
 ./benchmarks/compare_results.sh practo_base practo           # proof that the results are unchanged
+python3 benchmarks/check_rewrites.py                         # the rewrites for other parameter values
+python3 benchmarks/check_reports.py                          # every number in the reports against the raw files
 ```
 
 On macOS with Homebrew, put PostgreSQL's tools on the path first (`export PATH=/opt/homebrew/opt/postgresql@16/bin:$PATH`) and set `PGPORT` if this server is not on 5432; both scripts read the usual `PG*` variables and run on the stock bash 3.2.
