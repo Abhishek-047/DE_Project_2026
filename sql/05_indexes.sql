@@ -114,11 +114,14 @@ CREATE INDEX ix_patients_allergies
 
 -- ---------------------------------------------------------------------
 -- 7. Schedules by clinic
---    Serves: R13 (clinics with no schedule: NOT EXISTS probe by clinic_id),
---    and the "has a schedule at a clinic in city X" checks in R01, R18, R19.
+--    Serves: R13 (clinics with no schedule: NOT EXISTS probe by clinic_id).
 --    The primary key (doctor_id, weekday, start_time) only helps when doctor_id
---    is known; these queries start from the clinic side. It is also the
---    foreign-key index that a DELETE on clinics needs for its RESTRICT check.
+--    is known; R13 starts from the clinic side. It is also the foreign-key
+--    index that a DELETE on clinics needs for its RESTRICT check.
+--    R01, R18 and R19 join schedules to clinics too, but the planner does not
+--    use the index for them on this data: R01 starts from the doctor
+--    (pk_doctor_schedules), and R18 and R19 read the 30,499 schedules once,
+--    which is cheaper than probing the index for every clinic of the city.
 -- ---------------------------------------------------------------------
 CREATE INDEX ix_sched_clinic
     ON doctor_schedules (clinic_id);
@@ -196,7 +199,7 @@ COMMENT ON INDEX ix_presc_followup IS
 COMMENT ON INDEX ix_patients_allergies IS
     'R10: GIN on the allergies array, for allergies @> ARRAY[...].';
 COMMENT ON INDEX ix_sched_clinic IS
-    'R13 (NOT EXISTS by clinic) and the city checks of R01, R18, R19; also the foreign-key index for deletes on clinics.';
+    'R13 (NOT EXISTS by clinic); also the foreign-key index for deletes on clinics. R01, R18 and R19 read schedules another way.';
 COMMENT ON MATERIALIZED VIEW doctor_rating_summary IS
     'R14: review count, exact average rating and recommendations per doctor. Refreshed nightly with REFRESH MATERIALIZED VIEW CONCURRENTLY.';
 COMMENT ON INDEX ux_rating_summary_doctor IS

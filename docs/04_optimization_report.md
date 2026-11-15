@@ -317,7 +317,7 @@ Measured on a freshly built copy ([`index_sizes.txt`](../benchmarks/results/opti
 | `ix_appt_open_slot_end` | partial B-tree `(slot_end) WHERE status IN ('BOOKED','CHECKED_IN')` | appointments | 40 kB | 0.2% | W04 |
 | `ix_presc_followup` | partial B-tree `(follow_up_date) WHERE follow_up_date IS NOT NULL` | prescriptions (7.1 MB) | 224 kB | 3.1% | R11 |
 | `ix_patients_allergies` | GIN `(allergies)` | patients (4.2 MB) | 80 kB | 1.9% | R10 |
-| `ix_sched_clinic` | B-tree `(clinic_id)` | doctor_schedules (1.8 MB) | 248 kB | 13.8% | R13 (R01, R18, R19) |
+| `ix_sched_clinic` | B-tree `(clinic_id)` | doctor_schedules (1.8 MB) | 248 kB | 13.8% | R13; deletes on `clinics` |
 | `doctor_rating_summary` | materialized view + unique index | - | 192 kB + 88 kB | - | R14 |
 | `monthly_medicine_by_specialization` | materialized view + unique index | - | 304 kB + 248 kB | - | R15 |
 
