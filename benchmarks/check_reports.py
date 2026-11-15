@@ -13,7 +13,7 @@ recomputes each number from the files it came from:
                                   the plan excerpts of section 5 (run 3 of each cited
                                   file); the indexes-only comparison; write overhead, from
                                   the plans and the pgbench and refresh logs; index sizes;
-                                  the rejected rewrites
+                                  the rejected rewrites; which queries each index serves
   README.md                       our headline numbers
 
     python3 benchmarks/check_reports.py
@@ -313,8 +313,10 @@ def check_writes(c, text, base, opt):
     c.done()
 
 
-def check_storage(c, text):
-    """Section 8 against index_sizes.txt (pg_relation_size, in bytes and as pg_size_pretty prints them)."""
+def check_storage(c, text, opt):
+    """Section 8 against index_sizes.txt (pg_relation_size, in bytes and as pg_size_pretty prints them),
+    and its Serves column against the optimized plans: the queries named must be exactly those whose
+    plan reads the object."""
     sec = section(text, '8. Index storage')
     raw = (RESULTS / 'optimized' / 'index_sizes.txt').read_text()
     rows = {r[0]: r for r in (l.split('|') for l in raw.splitlines()) if len(r) == 6 and r[3].strip().isdigit()}
@@ -324,6 +326,8 @@ def check_storage(c, text):
     c.section('docs/04: index storage (section 8)')
     for m, cells in table_rows(sec, r'^`(\w+)`$'):
         name = m.group(1)
+        users = sorted((q for q in IDS if re.search(r'\b%s\b' % name, opt[q]['scan_nodes'])), key=IDS.index)
+        c.equal('docs/04 section 8 %s serves' % name, ', '.join(re.findall(r'[RW]\d\d', cells[5])), ', '.join(users))
         sizes = [x.strip().replace(',', '') for x in cells[3].split('+')]
         if rows[name][1] == 'materialized view':
             unique = [k for k, v in rows.items() if v[2] == name][0]
@@ -412,7 +416,7 @@ def main():
     check_excerpts(c, text, base, opt, idx)
     check_levers(c, text, base, idx, opt)
     check_writes(c, text, base, opt)
-    check_storage(c, text)
+    check_storage(c, text, opt)
     check_rejected(c, text, base, opt)
     check_readme(c, base, opt)
     for w in c.wrong:
