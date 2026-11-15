@@ -18,6 +18,7 @@ What we changed: **7 indexes and 2 summary tables** ([`sql/05_indexes.sql`](../s
 - **Optimized run** ([`benchmarks/results/optimized/`](../benchmarks/results/optimized/)): `./benchmarks/run_benchmark.sh practo optimized 5 sql/06_optimized_queries.sql`, i.e. 5 runs per query as given in the brief. As in Phase 3, one warm-up pass was run first and discarded; then `VACUUM (ANALYZE)` (the warm-up's rolled-back writes leave dead row versions behind, which autovacuum would remove on a live server).
 - **Indexes-only run** ([`benchmarks/results/indexes_only/`](../benchmarks/results/indexes_only/)): the *original* `queries/workload_30.sql` on the indexed database (3 runs). It separates what the indexes did from what the rewrites did (section 6).
 - **Proof that results are unchanged**: [`benchmarks/compare_results.sh`](../benchmarks/compare_results.sh), output in [`optimized/result_check.txt`](../benchmarks/results/optimized/result_check.txt) (section 4).
+- **Every number in this report** is recomputed from `benchmarks/results/` by [`benchmarks/check_reports.py`](../benchmarks/check_reports.py): 596 numbers across this report, `docs/03_baseline_timings.md` and the README.
 - **Write overhead and storage**: [`benchmarks/results/write_overhead/`](../benchmarks/results/write_overhead/) and [`optimized/index_sizes.txt`](../benchmarks/results/optimized/index_sizes.txt) (sections 7 and 8).
 - **Rewrites we tried and rejected**: [`benchmarks/results/rejected/`](../benchmarks/results/rejected/) (section 9).
 
@@ -130,6 +131,12 @@ Several of the original queries are **not deterministic**: their `ORDER BY` does
 **The original queries do not even agree with themselves.** Run 10 times in a row on the unchanged Phase 3 database ([`original_ties_repeat_runs.txt`](../benchmarks/results/optimized/original_ties_repeat_runs.txt)), the original R21 returned **7 different sets of 100 rows**, all with the same sort keys, and in run 5 it returned exactly the optimized query's answer (which is the same on every run). Its plan is a parallel scan merged by Gather Merge: the table's pages are handed to the leader and the worker as they ask for them, so each run splits the rows differently, and that decides which of the 29 June 10:30 appointments reach the top 100. R10 returned the same 726 rows every time, in 4 different orders. So the TIES and SAME verdicts were not introduced by the optimization; the original queries already differ in the same way from one run to the next.
 
 For R22 and W02 we went further than "same result" and made them deterministic with a tiebreaker (`appointment_id`), because a support console that can skip or repeat a row between pages, and a check-in that picks a random patient, are bugs. Every result of the rewritten queries is still one of the answers the original could have returned.
+
+### 4.4 Other values of the parameters
+
+The proof above is for the values the workload uses: doctor 217, 30 June 2026, the year 2026, page 4,001. [`benchmarks/check_rewrites.py`](../benchmarks/check_rewrites.py) runs ten of the twelve rewrites against their originals for other values, changing only the literals: 300 doctors (R02), 300 doctor-days including empty days and month and year boundaries (R05), every year (R08, R12), every month of the data (R15, R20), five start dates (R17), every city and language (R18), 50 pages (R22) and 26 days (W02). All 807 cases agree: 778 identical, and 29 with the same rows in another order where the sort keys tie (R15, R18). R13 is left out because its original is wrong, and R14 has no parameter.
+
+The seed data has no appointment that starts between 22:00 and 10:00, so this run alone could not see a day boundary moved by a few hours. The day and month rewrites do not rely on the data, though: `DATE(x) = d` holds exactly when `d <= x < d + 1` in the session time zone, which is the range the rewrites test.
 
 ## 5. Before/after plans: the five biggest improvements
 
@@ -355,6 +362,8 @@ psql -d practo -v ON_ERROR_STOP=1 -f sql/05_indexes.sql
 psql -d practo -c "VACUUM (ANALYZE)"
 ./benchmarks/run_benchmark.sh practo optimized 5 sql/06_optimized_queries.sql
 ./benchmarks/compare_results.sh practo_base practo      # proof of identical results
+python3 benchmarks/check_rewrites.py                    # the rewrites for other parameter values (section 4.4)
+python3 benchmarks/check_reports.py                     # every number in the reports against the raw files
 ```
 
 **Checked on a second machine.** On a MacBook Pro (Apple M4, macOS, Homebrew PostgreSQL 16.15) we rebuilt the database from `sql/01_schema.sql` and `sql/02_load_data.sql`, applied `sql/05_indexes.sql`, and ran `compare_results.sh` against an untouched Phase 3 copy. Every SQL file ran without errors and the verdicts match section 4, with one difference: R21 came out SAME instead of TIES, i.e. this time the original query happened to pick the same row at the `LIMIT` edge. That is the tie behaviour described in section 4, not a change in results.
