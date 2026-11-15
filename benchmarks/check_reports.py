@@ -348,7 +348,8 @@ def check_storage(c, text):
                   r'from ([^ ]+(?: kB)?) to ([^ ]+ [kM]B), while `ix_appt_slot_cover` grew only from ([^ ]+(?: kB)?) '
                   r'to ([^ ]+ [kM]B)', sec)
     for k, name in enumerate(cover):
-        c.equal('docs/04 section 8 bloat of %s' % name, (m.group(2 * k + 1), m.group(2 * k + 2)),
+        c.equal('docs/04 section 8 bloat of %s' % name,
+                (m.group(2 * k + 1).replace(',', ''), m.group(2 * k + 2).replace(',', '')),
                 (rows[name][4], after[name].strip()))
     c.done()
 
