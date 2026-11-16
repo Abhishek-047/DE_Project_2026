@@ -24,7 +24,7 @@
 |------|------|----------------|-----------------|
 | Group Lead | Aadi Kalra | 2501010002 | RedRangerWentWild |
 | Member 2 | Tushar Khemka | 2501010482 | thetusharkhemka |
-| Member 3 | Rudransh Singh | 2501010390 | |
+| Member 3 | Rudransh Singh | 2501010390 | rayrudr1817 |
 | Member 4 | Abhishek Panigrahi | 2501010019 | Abhishek-047 |
 
 **Team No.:** T0015 (Bluetrace) · **Section:** E · **Repository URL:** https://github.com/RedRangerWentWild/DE_Project_2026
