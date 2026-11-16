@@ -6,6 +6,7 @@ Practo's database was built in a hurry and has no documented schema. Seven teams
 
 | # | What the business needs (in our words) | Stakeholders affected | Class | Queries |
 |---|----------------------------------------|-----------------------|-------|---------|
+⁠All fees are in Indian rupees (₹). ⁠ fees.consult_fee ⁠ and ⁠ appointments.fee ⁠ hold whole-rupee amounts; a doctor can charge a different fee for a video consultation and an in-clinic one.
 | P1 | A patient must find a doctor by specialization, city and language, open the profile, and see free slots without waiting. Free slots are not stored; they are generated from the weekly schedule and then compared with existing appointments, so this gets slower as appointments grow. | Patient; doctor (loses bookings when search is slow) | Customer-facing / real-time | R01, R02, R03, R18 |
 | P2 | A signed-in patient must see their own upcoming appointments and prescriptions, sign in by mobile number, and book a slot immediately. Each of these touches one patient or one appointment, so it should cost the same however large the table is. | Patient; support (gets the complaints) | Customer-facing / real-time | R04, R06, R07, W01 |
 | P3 | The receptionist needs one doctor's queue for today and must be able to mark a patient as arrived while the patient is standing at the desk. | Clinic reception; doctor; patient | Customer-facing / real-time | R05, W02 |
