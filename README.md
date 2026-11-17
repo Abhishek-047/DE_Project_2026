@@ -13,6 +13,8 @@
 | `queries/workload_30.sql` | The 30 queries for Phase 3 (do not edit) |
 | `benchmarks/run_benchmark.sh` | Timing script: 3 runs per query, average, raw plans saved |
 | `CHECKPOINTS.md` | Checkpoint dates and the files each one needs (DE and AP repos) |
+| `sql/08_partitioning.sql` | Phase 5 declarative range partitioning for `appointments` |
+| `docs/05_scalability_report.md` | Phase 5 scalability and 100x architectural scaling blueprint |
 
 **Getting started:** **clone this repository and push it into your team's DE repo** (the DE repo you submitted in the form); the steps are in [`CHECKPOINTS.md`](CHECKPOINTS.md). Keep the structure shown in [Repository structure](#repository-structure-submit-exactly-this). Unzip `seed_data.zip` inside your project folder, but don't commit the CSV files. Deadlines are in [`CHECKPOINTS.md`](CHECKPOINTS.md). Then begin with Phase 1.
 
